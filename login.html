@@ -4,9 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login and User Creation</title>
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js"></script>
+  <!-- Firebase SDKs via CDN -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -66,6 +67,8 @@
     <button type="submit">Login</button>
   </form>
 
+
+
   <!-- Display messages -->
   <div id="message" class="message"></div>
   <div id="error" class="error"></div>
@@ -73,53 +76,80 @@
   <script>
     // Firebase Configuration
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_AUTH_DOMAIN",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_STORAGE_BUCKET",
-      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-      appId: "YOUR_APP_ID"
+      apiKey: "AIzaSyBg1GRKf79517G_ciUZVIB3llQrnEAEOOs",
+  authDomain: "instituteapp-ee49b.firebaseapp.com",
+  projectId: "instituteapp-ee49b",
+  storageBucket: "instituteapp-ee49b.firebasestorage.app",
+  messagingSenderId: "1058954351846",
+  appId: "1:1058954351846:web:699cd0c742210ccb929727",
+  measurementId: "G-1M32SGSLRN"
     };
 
     // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
+    firebase.initializeApp(firebaseConfig);
+
 
     // Reference to message and error divs
     const messageDiv = document.getElementById('message');
     const errorDiv = document.getElementById('error');
 
-    // Sign-Up Functionality
-    const signupForm = document.getElementById('signup-form');
-    signupForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('signup-email').value;
-      const password = document.getElementById('signup-password').value;
-      messageDiv.textContent = '';
-      errorDiv.textContent = '';
-      try {
-        await auth.createUserWithEmailAndPassword(email, password);
-        messageDiv.textContent = 'Account created successfully!';
-      } catch (error) {
-        errorDiv.textContent = `Error: ${error.message}`;
-      }
+const auth = firebase.auth();
+    // Initialize Firestore
+const db = firebase.firestore();
+
+// Sign-Up Functionality
+const signupForm = document.getElementById('signup-form');
+signupForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('signup-email').value;
+  const password = document.getElementById('signup-password').value;
+  const messageDiv = document.getElementById('message');
+  const errorDiv = document.getElementById('error');
+  
+  messageDiv.textContent = '';
+  errorDiv.textContent = '';
+
+  try {
+    // Create a new user with Firebase Authentication
+    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+    const user = userCredential.user;
+    
+    // Store user information in Firestore (optional)
+    await db.collection('users').doc(user.uid).set({
+      email: user.email,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-    // Login Functionality
-    const loginForm = document.getElementById('login-form');
-    loginForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('login-email').value;
-      const password = document.getElementById('login-password').value;
-      messageDiv.textContent = '';
-      errorDiv.textContent = '';
-      try {
-        await auth.signInWithEmailAndPassword(email, password);
-        messageDiv.textContent = 'Logged in successfully!';
-      } catch (error) {
-        errorDiv.textContent = `Error: ${error.message}`;
-      }
-    });
+    messageDiv.textContent = 'Account created successfully!';
+  } catch (error) {
+    errorDiv.textContent = `Error: ${error.message}`;
+  }
+});
+
+// Login Functionality
+const loginForm = document.getElementById('login-form');
+loginForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('login-email').value;
+  const password = document.getElementById('login-password').value;
+  const messageDiv = document.getElementById('message');
+  const errorDiv = document.getElementById('error');
+  
+  messageDiv.textContent = '';
+  errorDiv.textContent = '';
+
+  try {
+    // Log the user in with Firebase Authentication
+    const userCredential = await auth.signInWithEmailAndPassword(email, password);
+    const user = userCredential.user;
+
+    messageDiv.textContent = 'Logged in successfully!';
+  } catch (error) {
+    errorDiv.textContent = `Error: ${error.message}`;
+  }
+});
+
+
   </script>
 </body>
 </html>
